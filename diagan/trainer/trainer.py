@@ -10,6 +10,8 @@ from torch_mimicry.training import logger, metric_log
 
 from diagan.trainer.scheduler import DRS_LRScheduler
 from diagan.utils.plot import plot_gaussian_samples
+from diagan.utils.plot import LDR_plot
+import matplotlib.pyplot as plt
 
 
 class LogTrainer(mmc.training.Trainer):
@@ -154,6 +156,7 @@ class LogTrainer(mmc.training.Trainer):
                 logit_list[idx.cpu().numpy()] = logit_r.detach().cpu().numpy()
         netD.train()
         return logit_list
+
 
     def _restore_models_and_step(self):
         """
@@ -336,6 +339,27 @@ class LogTrainer(mmc.training.Trainer):
                     print(f"INFO: logit saving {mode} netD: {netD_name}...")
                     logit_list = self._get_logit(netD=netD, eval_mode=mode=='eval')
                     self.logit_results[f'{netD_name}_{mode}'][global_step] = logit_list
+
+                    logit_save_num += 1
+
+                if global_step % self.print_steps == 0:
+                    # for LDR graph
+                    if self.train_drs:
+                        netD = self.netD_drs
+                        netD_name = 'netD_drs'
+                    else:
+                        netD = self.netD
+                        netD_name = 'netD'
+                    mode = 'eval' if self.save_eval_logits else 'train'
+                    logit_list = self._get_logit(netD=netD, eval_mode=mode == 'eval')
+
+                    fig, ax = plt.subplots(figsize=(16, 8))
+                    ax.grid(axis='x')
+                    x = np.arange(len(logit_list))
+                    y = logit_list
+                    plt.scatter(x, y)
+                    plt.savefig(f'./{logit_save_num}.jpg')
+                    #
 
                     logit_save_num += 1
 

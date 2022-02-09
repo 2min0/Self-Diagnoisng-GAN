@@ -1,6 +1,7 @@
 import argparse
 import os
 from pathlib import Path
+import numpy as np
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -130,6 +131,8 @@ def main():
         stop_save_logit_after=args.stop_save_logit_after,
         )
     trainer.train()
+
+
 
 if __name__ == '__main__':
     main()
