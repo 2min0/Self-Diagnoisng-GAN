@@ -1,4 +1,5 @@
 import os
+import cv2
 import numpy as np
 from torch.utils.data import Dataset
 from new_typing import Any, Callable, Optional
@@ -40,7 +41,11 @@ class Dataset(Dataset):
         self.dataset_list = self.data_refiner.refine_data(root)
 
         for filename in self.dataset_list:
-            img = PIL.Image.open(filename)
+            img = cv2.imread(filename)
+            # 2048x2048 to 32x32 (to capture feature of images)
+            img = cv2.resize(img, dsize=(32, 32), interpolation=cv2.INTER_AREA)
+            # convert cv2 to PIL image
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             self.data.append(img)
 
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
