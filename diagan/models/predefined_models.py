@@ -162,6 +162,45 @@ def get_ffhq_disc(model='stylegan', **kwargs):
     return netD, optD
 
 
+def get_normal_gen(model='sngan', loss_type='hinge', gold=False, topk=False, **kwargs):
+    model_dict = {
+        'sngan': sngan.SNGANGenerator32,
+        'infomax_gan': infomax_gan.InfoMaxGANGenerator32,
+        'ssgan': ssgan.SSGANGenerator32,
+    }
+    topk_model_dict = {
+        'sngan': TopkSNGANGenerator32,
+        'infomax_gan': TopkInfoMaxGANGenerator32,
+        'ssgan': TopkSSGANGenerator32,
+    }
+    if topk:
+        netG = topk_model_dict[model](loss_type=loss_type, topk=topk, **kwargs)
+    else:
+        netG = model_dict[model](loss_type=loss_type, **kwargs)
+    optG = optim.Adam(netG.parameters(), 2e-4, betas=(0.0, 0.9))
+    return netG, optG
+
+
+def get_normal_disc(model='sngan', loss_type='hinge', gold=False, topk=False, **kwargs):
+    model_dict = {
+        'sngan': sngan.SNGANDiscriminator32,
+        'infomax_gan': infomax_gan.InfoMaxGANDiscriminator32,
+        'ssgan': ssgan.SSGANDiscriminator32,
+    }
+    gold_model_dict = {
+        'sngan': GoldSNGANDiscriminator32,
+        'infomax_gan': GoldInfoMaxGANDiscriminator32,
+        'ssgan': GoldSSGANDiscriminator32
+    }
+    if gold:
+        netD = gold_model_dict[model](loss_type=loss_type, **kwargs)
+    else:
+        netD = model_dict[model](loss_type=loss_type, **kwargs)
+    optD = optim.Adam(netD.parameters(), 2e-4, betas=(0.0, 0.9))
+    return netD, optD
+
+
+
 DATASET_DICT = {
     'celeba': (get_celeba_gen, get_celeba_disc),
     'cifar10': (get_cifar10_gen, get_cifar10_disc),
@@ -169,6 +208,7 @@ DATASET_DICT = {
     'ffhq': (get_ffhq_gen, get_ffhq_disc),
     'color_mnist': (get_color_mnist_gen, get_color_mnist_disc),
     'mnist_fmnist': (get_mnist_fmnist_gen, get_mnist_fmnist_disc),
+    'normal': (get_normal_gen, get_normal_disc)
 }
 
 

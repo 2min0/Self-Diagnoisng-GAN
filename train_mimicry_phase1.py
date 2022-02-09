@@ -82,14 +82,20 @@ def main():
     if args.dataset == 'celeba':
         args.num_steps = 75000
         args.logit_save_steps = 100
-        args.save_logit_after= 55000
-        args.stop_save_logit_after= 60000
+        args.save_logit_after = 55000
+        args.stop_save_logit_after = 60000
 
     if args.dataset == 'cifar10':
         args.num_steps = 50000
         args.logit_save_steps = 100
-        args.save_logit_after= 35000
-        args.stop_save_logit_after= 40000
+        args.save_logit_after = 35000
+        args.stop_save_logit_after = 40000
+
+    if args.dataset == 'normal':
+        args.num_steps = 5000
+        args.logit_save_steps = 100
+        args.save_logit_after = 3500
+        args.stop_save_logit_after = 4000
 
     print(args)
 

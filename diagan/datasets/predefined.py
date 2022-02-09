@@ -6,8 +6,11 @@ from diagan.datasets.transform import get_transform
 from torch.utils.data import Dataset
 from torchvision.datasets.celeba import CelebA
 from torchvision.datasets.cifar import CIFAR10
+from new_dataloader import Dataset
+
 
 DATASET_DICT = {
+    'normal' : Dataset,
     'cifar10': CIFAR10,
     'celeba': CelebA,
     'color_mnist': ColoredMNIST,
@@ -32,5 +35,5 @@ def get_predefined_dataset(dataset_name, root, weights=None, **kwargs):
         dataset = get_25gaussian_dataset()
     else:
         transform = get_transform(dataset_name)
-        dataset = DATASET_DICT[dataset_name](root=root, transform=transform, download=True, **kwargs)
+        dataset = DATASET_DICT[dataset_name](root=root, transform=transform, download=False, **kwargs)
     return WeightedDataset(dataset=dataset, weights=weights)
