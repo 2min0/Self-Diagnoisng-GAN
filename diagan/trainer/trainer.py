@@ -346,10 +346,8 @@ class LogTrainer(mmc.training.Trainer):
                     # for LDR graph
                     if self.train_drs:
                         netD = self.netD_drs
-                        netD_name = 'netD_drs'
                     else:
                         netD = self.netD
-                        netD_name = 'netD'
                     mode = 'eval' if self.save_eval_logits else 'train'
                     logit_list = self._get_logit(netD=netD, eval_mode=mode == 'eval')
 
@@ -360,8 +358,6 @@ class LogTrainer(mmc.training.Trainer):
                     plt.scatter(x, y)
                     plt.savefig(f'./{logit_save_num}.jpg')
                     #
-
-                    logit_save_num += 1
 
                 if global_step % self.save_steps == 0:
                     print("INFO: Saving checkpoints...")

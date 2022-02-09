@@ -93,10 +93,10 @@ def main():
         args.stop_save_logit_after = 40000
 
     if args.dataset == 'normal':
-        args.num_steps = 5000
+        args.num_steps = 50000
         args.logit_save_steps = 100
-        args.save_logit_after = 3500
-        args.stop_save_logit_after = 4000
+        args.save_logit_after = 35000
+        args.stop_save_logit_after = 40000
 
     print(args)
 
