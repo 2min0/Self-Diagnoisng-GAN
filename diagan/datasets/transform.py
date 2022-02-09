@@ -41,6 +41,7 @@ def get_mnist_fmnist_transform():
 
 
 DATASET_DICT = {
+    'normal': get_cifar10_transform,
     'celeba': get_celeba_transform,
     'cifar10': get_cifar10_transform,
     'color_mnist': get_color_mnist_transform,

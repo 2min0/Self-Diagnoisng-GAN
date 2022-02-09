@@ -6,6 +6,7 @@ from diagan.datasets.transform import get_transform
 from torch.utils.data import Dataset
 from torchvision.datasets.celeba import CelebA
 from torchvision.datasets.cifar import CIFAR10
+from torchvision import datasets
 
 DATASET_DICT = {
     'cifar10': CIFAR10,
@@ -30,7 +31,12 @@ class WeightedDataset(Dataset):
 def get_predefined_dataset(dataset_name, root, weights=None, **kwargs):
     if dataset_name == '25gaussian':
         dataset = get_25gaussian_dataset()
+    elif dataset_name == 'normal':
+        transform = get_transform(dataset_name)
+        dataset = datasets.ImageFolder(root='/home/nica/Downloads/dataset/Original_medical_220208/medical_train',
+                                       transform=transform)
     else:
         transform = get_transform(dataset_name)
         dataset = DATASET_DICT[dataset_name](root=root, transform=transform, download=True, **kwargs)
+
     return WeightedDataset(dataset=dataset, weights=weights)
