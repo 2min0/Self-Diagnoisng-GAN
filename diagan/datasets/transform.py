@@ -39,8 +39,19 @@ def get_mnist_fmnist_transform():
         transforms.Normalize((0.5,), (0.5,))])
     return transform
 
+def get_normal_transform():
+    img_size = 32
+    transform = transforms.Compose([
+        transforms.Resize(img_size),
+        transforms.CenterCrop(img_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.5, 0.5, 0.5),
+                             std=(0.5, 0.5, 0.5))])
+    return transform
+
 
 DATASET_DICT = {
+    'normal' : get_normal_transform
     'celeba': get_celeba_transform,
     'cifar10': get_cifar10_transform,
     'color_mnist': get_color_mnist_transform,
