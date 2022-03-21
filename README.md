@@ -1,5 +1,6 @@
 # Self-Diagnosing GAN (NeurIPS 2021): modified for medical dataset
 Code for Self-Diagnosing GAN: Diagnosing Underrepresented Samples in Generative Adversarial Networks (NeurIPS 2021)  
+
 **Modified code list:**  
 ./diagan/datasets/predefined.py  
 ./diagan/datasets/transform.py  
