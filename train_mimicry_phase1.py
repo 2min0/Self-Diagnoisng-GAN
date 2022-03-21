@@ -91,6 +91,12 @@ def main():
         args.save_logit_after= 35000
         args.stop_save_logit_after= 40000
 
+    if args.dataset == 'medical':
+        args.num_steps = 50000
+        args.logit_save_steps = 100
+        args.save_logit_after = 35000
+        args.step_save_logit_after = 40000
+
     print(args)
 
     if args.ckpt_step:

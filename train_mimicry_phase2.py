@@ -13,9 +13,10 @@ from diagan.models.predefined_models import get_gan_model
 from diagan.trainer.trainer import LogTrainer
 from diagan.utils.plot import (
     calculate_scores, print_num_params,
-                                    show_sorted_score_samples
+    show_sorted_score_samples
 )
 from diagan.utils.settings import set_seed
+from pandas import Series, DataFrame
 
 
 def get_dataloader(dataset, batch_size=128, weights=None, eps=1e-6):
@@ -54,6 +55,8 @@ def main():
     parser.add_argument('--resample_score', type=str)
     parser.add_argument('--gold', action='store_true')
     parser.add_argument('--topk', action='store_true')
+    parser.add_argument('--num_minor', default=50, type=int)
+    parser.add_argument('--num_major', default=500, type=int)
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
@@ -72,7 +75,6 @@ def main():
     else:
         device = "cpu"
 
-    
     prefix = args.exp_name.split('/')[-1]
 
     if args.dataset == 'celeba':
@@ -82,7 +84,6 @@ def main():
     else:
         window = 5000
 
-
     if not args.gold:
         logit_path = baseline_save_path / 'logits_netD_eval.pkl'
         print(f'Use logit from: {logit_path}')
@@ -90,8 +91,49 @@ def main():
         score_start_step = (args.p1_step - window)
         score_end_step = args.p1_step
         score_dict = calculate_scores(logits, start_epoch=score_start_step, end_epoch=score_end_step)
+        # print(len(score_dict['ldrm']), len(score_dict['ldrv'])) >>> 1100, 1100
         sample_weights = score_dict[args.resample_score]
-        print(f'sample_weights mean: {sample_weights.mean()}, var: {sample_weights.var()}, max: {sample_weights.max()}, min: {sample_weights.min()}')
+        print(
+            f'sample_weights mean: {sample_weights.mean()}, var: {sample_weights.var()}, max: {sample_weights.max()}, min: {sample_weights.min()}')
+
+        ######################
+        # save LDRM and LDRV
+        ######################
+        # for convenience: define variables of # of major samples and minor samples
+        ma = args.num_major
+        mi = args.num_minor
+        # make empty arrays for dataframe. '+1' is because of the first "mean" row in dataframe.
+        ldrm_array = np.zeros((4, ma + 1))
+        ldrv_array = np.zeros((4, ma + 1))
+        # fill 'ldrm_array'
+        for i in range(2):
+            for j in range(2):
+                # If ma=50 and mi=50, split 'ldrm' array into [0:50], [50:550], [550:600], [600:1100]
+                values = score_dict['ldrm'][(ma + mi) * i + mi * j:(ma + mi) * i + mi + ma * j]
+                # The first row is the average.
+                ldrm_array[2 * i + j][0] = np.mean(np.array(values))
+                # In the rows except the first row, there are 'ldrm' values.
+                for k in range(len(values)):
+                    ldrm_array[2 * i + j][k + 1] = values[k]
+        # fill 'ldrv_array' in the same way.
+        for i in range(2):
+            for j in range(2):
+                values = score_dict['ldrv'][(ma + mi) * i + mi * j:(ma + mi) * i + mi + ma * j]
+                ldrv_array[2 * i + j][0] = np.mean(np.array(values))
+                for k in range(len(values)):
+                    ldrv_array[2 * i + j][k + 1] = values[k]
+        # make a dataframe. 3 classification criteria: LDRM or LDRV, label 0 or 1, minor or major
+        df = DataFrame({'LDRM_0_minor': ldrm_array[0].tolist(),
+                        'LDRM_0_major': ldrm_array[1].tolist(),
+                        'LDRM_1_minor': ldrm_array[2].tolist(),
+                        'LDRM_1_major': ldrm_array[3].tolist(),
+                        'LDRV_0_minor': ldrv_array[0].tolist(),
+                        'LDRV_0_major': ldrv_array[1].tolist(),
+                        'LDRV_1_minor': ldrv_array[2].tolist(),
+                        'LDRV_1_major': ldrv_array[3].tolist()})
+        # set the name (index) of the first row as "mean".
+        df.rename(index={0: "mean"}, inplace=True)
+        df.to_csv(f"{output_dir}/LDR_output.csv")
     else:
         sample_weights = None
 
@@ -107,9 +149,8 @@ def main():
         topk=args.topk,
         gold=args.gold,
     )
-    
+
     print(f'model: {args.model} - netD_drs_ckpt_path: {netD_drs_ckpt_path}')
-    
 
     print_num_params(netG, netD)
 
@@ -120,8 +161,9 @@ def main():
     dl_drs = get_dataloader(ds_drs, batch_size=args.batch_size, weights=None)
 
     if not args.gold:
-        show_sorted_score_samples(ds_train, score=sample_weights, save_path=save_path, score_name=args.resample_score, plot_name=prefix)
-    
+        show_sorted_score_samples(ds_train, score=sample_weights, save_path=save_path, score_name=args.resample_score,
+                                  plot_name=prefix)
+
     print(args)
 
     # Start training
@@ -151,6 +193,7 @@ def main():
         save_logits=False,
     )
     trainer.train()
+
 
 if __name__ == '__main__':
     main()
