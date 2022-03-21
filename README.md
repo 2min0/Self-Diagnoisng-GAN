@@ -1,5 +1,10 @@
-# Self-Diagnosing GAN (NeurIPS 2021)
-Code for Self-Diagnosing GAN: Diagnosing Underrepresented Samples in Generative Adversarial Networks (NeurIPS 2021)
+# Self-Diagnosing GAN (NeurIPS 2021): modified for medical dataset
+Code for Self-Diagnosing GAN: Diagnosing Underrepresented Samples in Generative Adversarial Networks (NeurIPS 2021)  
+**Modified code list:**  
+./diagan/datasets/predefined.py  
+./diagan/datasets/transform.py  
+./train_mimicry_phase1.py  
+./train_mimicry_phase2.py
 
 ## Setup
 This setting requires CUDA 11.
@@ -15,7 +20,6 @@ conda activate torchenv
 ```
 pip install -e diagan-pkg
 ```
-
 ## Train for CIFAR-10 & CelebA
 ### Phase 1
 1. Original GAN training
@@ -36,13 +40,23 @@ python train_mimicry_phase1.py --exp_name cifar10-phase1 --dataset cifar10 --roo
 python train_mimicry_phase1.py --exp_name celeba-phase1 --dataset celeba --root ./dataset/celeba --loss_type ns --seed 1 --model sngan  --gpu 0  --save_logit_after 55000 --stop_save_logit_after 60000
 ```
 
+* Medical dataset
+```
+python train_mimicry_phase1.py --exp_name medical-phase1 --dataset medical --root ./dataset/medical_train --loss_type ns --seed 1 --model sngan  --gpu 0  --save_logit_after 35000 --stop_save_logit_after 40000
+```
+
 Downloading CelebA dataset might took very long. We recommend direct downloading from this [website](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html).
 
 2. Top-k training
+* CelebA
 ```
 python train_mimicry_phase1.py --exp_name celeba-topk --dataset celeba --root ./dataset/celeba --loss_type ns --seed 1 --model sngan  --gpu 0  --save_logit_after 55000 --stop_save_logit_after 60000 --topk
 ```
 
+* Medical dataset
+```
+python train_mimicry_phase1.py --exp_name medical-topk --dataset medical --root ./dataset/medical_train --loss_type ns --seed 1 --model sngan  --gpu 0  --save_logit_after 55000 --stop_save_logit_after 60000 --topk
+```
 
 ### Phase 2
 1. Dia-GAN (Ours)
@@ -56,9 +70,19 @@ python train_mimicry_phase2.py --gpu 0 --exp_name cifar10-phase2 --resample_scor
 python train_mimicry_phase2.py --gpu 0 --exp_name celeba-phase2 --resample_score ldr_conf_5.0_ratio_50 --baseline_exp_name celeba-phase1 --seed 1 --p1_step 60000 --dataset celeba --root ./dataset/celeba  --loss_type ns  --num_steps 75000 --model sngan
 ```
 
+* Medical dataset
+```
+python train_mimicry_phase2.py --gpu 0 --exp_name medical-phase2 --resample_score ldr_conf_0.3_ratio_50 --baseline_exp_name cifar10-phase1 --seed 1 --p1_step 40000 --dataset medical --root ./dataset/medical_train --loss_type ns  --num_steps 50000 --model sngan
+```
+
 2. GOLD Reweight
+* CelebA
 ```
 python train_mimicry_phase2.py --gpu 0 --exp_name celeba-gold --baseline_exp_name celeba-phase1 --seed 1 --p1_step 60000 --dataset celeba --root ./dataset/celeba  --loss_type ns  --num_steps 75000 --model sngan --gold
+```
+* Medical dataset
+```
+python train_mimicry_phase2.py --gpu 0 --exp_name medical-gold --baseline_exp_name medical-phase1 --seed 1 --p1_step 60000 --dataset medical --root ./dataset/medical_train  --loss_type ns  --num_steps 75000 --model sngan --gold
 ```
 
 ## Eval
