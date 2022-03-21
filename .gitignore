@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 .vscode/*
 .idea
+
+# results
+exp_results/
