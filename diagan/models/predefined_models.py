@@ -163,6 +163,7 @@ def get_ffhq_disc(model='stylegan', **kwargs):
 
 
 DATASET_DICT = {
+    'medical' : (get_cifar10_gen, get_cifar10_disc),
     'celeba': (get_celeba_gen, get_celeba_disc),
     'cifar10': (get_cifar10_gen, get_cifar10_disc),
     '25gaussian': (get_toy_gen, get_toy_disc),
